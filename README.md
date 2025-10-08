@@ -1,16 +1,29 @@
-# bookmark_manager
+# Bookmark Manager
 
-A new Flutter project.
+Flutter + Firebase를 활용한 크로스 플랫폼 북마크 관리 앱
 
-## Getting Started
+## 🎯 프로젝트 목표
+- 첫 배포 경험 쌓기
+- 웹과 모바일 모두 지원하는 앱 개발
 
-This project is a starting point for a Flutter application.
+## 🛠 기술 스택
+- **Frontend**: Flutter 3.35.4
+- **Backend**: Firebase (Auth, Firestore)
+- **Platforms**: Web, Android, iOS, macOS
 
-A few resources to get you started if this is your first Flutter project:
+## 📦 주요 기능 (예정)
+- 사용자 인증 (로그인/회원가입)
+- 북마크 추가/수정/삭제
+- 카테고리별 관리
+- 검색 기능
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🚀 실행 방법
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# 패키지 설치
+flutter pub get
+
+# 웹에서 실행
+flutter run -d chrome
+
+# Android에서 실행
+flutter run -d android
