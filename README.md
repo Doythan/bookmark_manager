@@ -19,13 +19,13 @@ Flutter + Firebase를 활용한 크로스 플랫폼 북마크 관리 앱
 
 ## 🚀 실행 방법
 
-# 패키지 설치
+### 패키지 설치
 flutter pub get
 
-# 웹에서 실행
+### 웹에서 실행
 flutter run -d chrome
 
-# Android에서 실행
+### Android에서 실행
 flutter run -d android
 
 ## Commit 컨벤션
