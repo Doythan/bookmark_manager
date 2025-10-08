@@ -27,3 +27,12 @@ flutter run -d chrome
 
 # Android에서 실행
 flutter run -d android
+
+## Commit 컨벤션
+- feat : 새 기능 추가
+- fix : 버그 수정
+- refactor : 동작 동일, 구조/가독성 개선
+- docs : 문서/주석/README 변경
+- test : 테스트 추가/수정
+- build : 빌드 시스템/의존성
+- revert : 변경 되돌리기
