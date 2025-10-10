@@ -43,3 +43,41 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ========================================
+# 🔒 보안: 절대 커밋하면 안 되는 파일들
+# ========================================
+
+# Firebase Service Account Keys (서버 인증용)
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Android Signing Keys
+*.jks
+*.keystore
+android/key.properties
+
+# iOS Certificates
+*.p12
+*.mobileprovision
+
+# API Keys and Secrets
+secrets.yaml
+api_keys.dart
+
+# Firebase Local Emulator
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
