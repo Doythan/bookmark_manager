@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/legacy.dart'; // ← StateProvider 사용 위해
 
 import '../../auth/services/auth_provider.dart';
 import '../models/bookmark.dart';
