@@ -42,12 +42,6 @@
       }
     },
     {
-      "client_info": {
-        "mobilesdk_app_id": "1:981420750189:android:3e6a3c6c20ffaa50031664",
-        "android_client_info": {
-          "package_name": "com.example.bookmark_manager"
-        }
-      },
       "oauth_client": [
         {
           "client_id": "981420750189-aqolmeujpcodi6mak0r194h9eckpp6ac.apps.googleusercontent.com",
