@@ -149,7 +149,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Future<void> _openBookmark(BuildContext context, Bookmark bookmark) async {
-    await UrlLauncherHelper.openUrl(bookmark.url);
+    await UrlLauncherHelper.openUrl(bookmark.url, context);
   }
 
   void _showAddBookmarkDialog(BuildContext context, WidgetRef ref) {

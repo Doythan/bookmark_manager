@@ -131,7 +131,7 @@ class _SearchResults extends ConsumerWidget {
               bookmark: bookmark,
               onTap: () async {
                 // URL 열기
-                await UrlLauncherHelper.openUrl(bookmark.url);
+                await UrlLauncherHelper.openUrl(bookmark.url, context);
                 if (context.mounted) {
                   Navigator.pop(context);
                 }

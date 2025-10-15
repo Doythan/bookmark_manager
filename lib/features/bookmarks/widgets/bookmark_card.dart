@@ -23,6 +23,8 @@ class BookmarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final urlType = UrlLauncherHelper.detectUrlType(bookmark.url);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -35,9 +37,29 @@ class BookmarkCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 헤더 (제목 + 액션 버튼)
+              // 헤더 (아이콘 + 제목 + 액션 버튼)
               Row(
                 children: [
+                  // URL 타입 아이콘 (SNS인 경우만)
+                  if (urlType != UrlType.general) ...[
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: UrlLauncherHelper.getColor(
+                          urlType,
+                        )?.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        UrlLauncherHelper.getIcon(urlType),
+                        size: 20,
+                        color: UrlLauncherHelper.getColor(urlType),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+
+                  // 제목
                   Expanded(
                     child: Text(
                       bookmark.title,
@@ -50,33 +72,35 @@ class BookmarkCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+
+                  // 액션 메뉴
                   PopupMenuButton(
                     icon: const Icon(Icons.more_vert),
                     itemBuilder: (context) => [
-                      PopupMenuItem(
+                      const PopupMenuItem(
                         value: 'copy',
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.copy, size: 20),
                             SizedBox(width: 8),
                             Text('URL 복사'),
                           ],
                         ),
                       ),
-                      PopupMenuItem(
+                      const PopupMenuItem(
                         value: 'edit',
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.edit, size: 20),
                             SizedBox(width: 8),
                             Text('수정'),
                           ],
                         ),
                       ),
-                      PopupMenuItem(
+                      const PopupMenuItem(
                         value: 'delete',
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(
                               Icons.delete,
                               size: 20,
@@ -109,9 +133,9 @@ class BookmarkCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // URL (클릭 가능)
+              // URL (클릭 가능) - context 전달
               InkWell(
-                onTap: () => UrlLauncherHelper.openUrl(bookmark.url),
+                onTap: () => UrlLauncherHelper.openUrl(bookmark.url, context),
                 child: Text(
                   bookmark.url,
                   style: const TextStyle(
