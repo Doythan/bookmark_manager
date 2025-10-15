@@ -22,16 +22,27 @@ final bookmarksStreamProvider = StreamProvider<List<Bookmark>>((ref) {
   return bookmarkService.getBookmarksStream(currentUser.uid);
 });
 
-// 카테고리 목록 Provider
-final categoriesProvider = FutureProvider<List<String>>((ref) async {
-  final bookmarkService = ref.watch(bookmarkServiceProvider);
-  final currentUser = ref.watch(currentUserProvider);
+// 카테고리 목록 Provider (Stream으로 변경!) ✅
+final categoriesProvider = StreamProvider.autoDispose<List<String>>((ref) {
+  final bookmarksAsync = ref.watch(bookmarksStreamProvider);
 
-  if (currentUser == null) {
-    return [];
-  }
+  // 북마크 Stream에서 카테고리 추출
+  return bookmarksAsync.when(
+    data: (bookmarks) {
+      // 중복 제거 및 정렬
+      final categories = bookmarks
+          .map((bookmark) => bookmark.category)
+          .toSet()
+          .toList();
 
-  return await bookmarkService.getCategories(currentUser.uid);
+      categories.sort();
+
+      // Stream으로 반환
+      return Stream.value(categories);
+    },
+    loading: () => Stream.value([]),
+    error: (_, __) => Stream.value([]),
+  );
 });
 
 // 선택된 카테고리 Provider (필터링용)
