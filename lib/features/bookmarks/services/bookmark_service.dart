@@ -115,4 +115,65 @@ class BookmarkService {
       throw '카테고리 조회 중 오류가 발생했습니다: $e';
     }
   }
+
+  // 카테고리 이름 변경 (사용자의 모든 북마크)
+  Future<void> renameCategoryForUser(
+    String userId,
+    String oldCategory,
+    String newCategory,
+  ) async {
+    try {
+      // General은 변경 불가
+      if (oldCategory == 'General') {
+        throw 'General 카테고리는 변경할 수 없습니다';
+      }
+
+      // 같은 이름이면 무시
+      if (oldCategory == newCategory) {
+        return;
+      }
+
+      // 해당 카테고리를 사용하는 모든 북마크 조회
+      final snapshot = await _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .where('category', isEqualTo: oldCategory)
+          .get();
+
+      // Batch로 한번에 업데이트
+      final batch = _firestore.batch();
+
+      for (var doc in snapshot.docs) {
+        batch.update(doc.reference, {
+          'category': newCategory,
+          'updatedAt': Timestamp.now(),
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw '카테고리 변경 중 오류가 발생했습니다: $e';
+    }
+  }
+
+  // 사용자의 카테고리별 북마크 개수
+  Future<Map<String, int>> getCategoryCounts(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      final Map<String, int> counts = {};
+
+      for (var doc in snapshot.docs) {
+        final category = doc.data()['category'] as String? ?? 'General';
+        counts[category] = (counts[category] ?? 0) + 1;
+      }
+
+      return counts;
+    } catch (e) {
+      throw '카테고리 통계 조회 중 오류가 발생했습니다: $e';
+    }
+  }
 }

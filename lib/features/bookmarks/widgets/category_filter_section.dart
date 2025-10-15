@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../services/bookmark_provider.dart';
+import 'manage_categories_dialog.dart';
 
 class CategoryFilterSection extends ConsumerWidget {
   const CategoryFilterSection({super.key});
@@ -14,9 +15,8 @@ class CategoryFilterSection extends ConsumerWidget {
 
     return categoriesAsync.when(
       data: (categories) {
-        if (categories.isEmpty) {
-          return const SizedBox.shrink();
-        }
+        // General 추가
+        final allCategories = {'General', ...categories}.toList();
 
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -43,7 +43,7 @@ class CategoryFilterSection extends ConsumerWidget {
                 const SizedBox(width: 8),
 
                 // 카테고리 버튼들
-                ...categories.map((category) {
+                ...allCategories.map((category) {
                   final isSelected = selectedCategory == category;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -68,6 +68,31 @@ class CategoryFilterSection extends ConsumerWidget {
                     ),
                   );
                 }),
+
+                // 카테고리 관리 버튼
+                const SizedBox(width: 4),
+                ActionChip(
+                  avatar: const Icon(
+                    Icons.settings,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                  label: const Text(
+                    '관리',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const ManageCategoriesDialog(),
+                    );
+                  },
+                  backgroundColor: AppColors.primaryLight,
+                  side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                ),
               ],
             ),
           ),

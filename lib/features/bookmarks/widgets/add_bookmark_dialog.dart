@@ -7,6 +7,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../auth/services/auth_provider.dart';
 import '../models/bookmark.dart';
 import '../services/bookmark_provider.dart';
+import 'category_autocomplete.dart';
 
 class AddBookmarkDialog extends ConsumerStatefulWidget {
   final Bookmark? bookmark; // null이면 추가, 있으면 수정
@@ -24,18 +25,6 @@ class _AddBookmarkDialogState extends ConsumerState<AddBookmarkDialog> {
   late final TextEditingController _descriptionController;
   late String _selectedCategory;
   bool _isLoading = false;
-
-  // 기본 카테고리 목록
-  final List<String> _defaultCategories = [
-    'General',
-    'Development',
-    'Design',
-    'News',
-    'Entertainment',
-    'Education',
-    'Shopping',
-    'Social',
-  ];
 
   @override
   void initState() {
@@ -83,7 +72,7 @@ class _AddBookmarkDialogState extends ConsumerState<AddBookmarkDialog> {
           url: _urlController.text.trim(),
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
-          category: _selectedCategory,
+          category: _selectedCategory.trim(),
           createdAt: now,
           updatedAt: now,
         );
@@ -103,7 +92,7 @@ class _AddBookmarkDialogState extends ConsumerState<AddBookmarkDialog> {
           url: _urlController.text.trim(),
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
-          category: _selectedCategory,
+          category: _selectedCategory.trim(),
           updatedAt: now,
         );
 
@@ -221,28 +210,13 @@ class _AddBookmarkDialogState extends ConsumerState<AddBookmarkDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 카테고리 선택
-                  DropdownButtonFormField<String>(
+                  // 카테고리 선택 (Autocomplete로 변경!)
+                  CategoryAutocomplete(
                     initialValue: _selectedCategory,
-                    decoration: InputDecoration(
-                      labelText: AppStrings.category,
-                      prefixIcon: const Icon(Icons.category),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: _defaultCategories.map((category) {
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
-                      );
-                    }).toList(),
                     onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      }
+                      setState(() {
+                        _selectedCategory = value;
+                      });
                     },
                   ),
                   const SizedBox(height: 24),
