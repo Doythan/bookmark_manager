@@ -176,4 +176,40 @@ class BookmarkService {
       throw '카테고리 통계 조회 중 오류가 발생했습니다: $e';
     }
   }
+
+  // 카테고리 삭제 (해당 카테고리 북마크들을 General로 이동)
+  Future<void> deleteCategoryForUser(String userId, String category) async {
+    try {
+      // General은 삭제 불가
+      if (category == 'General') {
+        throw 'General 카테고리는 삭제할 수 없습니다';
+      }
+
+      // 해당 카테고리를 사용하는 모든 북마크 조회
+      final snapshot = await _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .where('category', isEqualTo: category)
+          .get();
+
+      // 북마크가 없으면 그냥 종료
+      if (snapshot.docs.isEmpty) {
+        return;
+      }
+
+      // Batch로 한번에 업데이트 (모두 General로 변경)
+      final batch = _firestore.batch();
+
+      for (var doc in snapshot.docs) {
+        batch.update(doc.reference, {
+          'category': 'General',
+          'updatedAt': Timestamp.now(),
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw '카테고리 삭제 중 오류가 발생했습니다: $e';
+    }
+  }
 }

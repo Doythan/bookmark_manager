@@ -81,6 +81,101 @@ class _ManageCategoriesDialogState
     }
   }
 
+  // 삭제 확인 다이얼로그
+  Future<void> _confirmDelete(String category) async {
+    final bookmarkService = ref.read(bookmarkServiceProvider);
+    final currentUser = ref.read(currentUserProvider);
+
+    if (currentUser == null) return;
+
+    // 해당 카테고리의 북마크 개수 조회
+    final counts = await bookmarkService.getCategoryCounts(currentUser.uid);
+    final bookmarkCount = counts[category] ?? 0;
+
+    if (!mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('카테고리 삭제'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('정말 "$category" 카테고리를 삭제하시겠습니까?'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.orange[700]),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      bookmarkCount > 0
+                          ? '이 카테고리의 북마크 $bookmarkCount개가\nGeneral 카테고리로 이동됩니다.'
+                          : '이 카테고리에는 북마크가 없습니다.',
+                      style: TextStyle(fontSize: 13, color: Colors.orange[900]),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('삭제'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    await _deleteCategory(category);
+  }
+
+  // 카테고리 삭제 실행
+  Future<void> _deleteCategory(String category) async {
+    try {
+      final bookmarkService = ref.read(bookmarkServiceProvider);
+      final currentUser = ref.read(currentUserProvider);
+
+      if (currentUser == null) return;
+
+      await bookmarkService.deleteCategoryForUser(currentUser.uid, category);
+
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: '카테고리가 삭제되었습니다',
+          backgroundColor: AppColors.success,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: e.toString(),
+          backgroundColor: AppColors.error,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
@@ -172,7 +267,7 @@ class _ManageCategoriesDialogState
                                 ),
                           subtitle: isGeneral
                               ? const Text(
-                                  '기본 카테고리 (수정 불가)',
+                                  '기본 카테고리 (수정/삭제 불가)',
                                   style: TextStyle(fontSize: 12),
                                 )
                               : null,
@@ -204,10 +299,24 @@ class _ManageCategoriesDialogState
                                     ),
                                   ],
                                 )
-                              : IconButton(
-                                  icon: const Icon(Icons.edit, size: 20),
-                                  onPressed: () => _startEditing(category),
-                                  tooltip: '이름 변경',
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, size: 20),
+                                      onPressed: () => _startEditing(category),
+                                      tooltip: '이름 변경',
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        size: 20,
+                                        color: AppColors.error,
+                                      ),
+                                      onPressed: () => _confirmDelete(category),
+                                      tooltip: '삭제',
+                                    ),
+                                  ],
                                 ),
                         ),
                       );
@@ -231,8 +340,12 @@ class _ManageCategoriesDialogState
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '💡 팁: 북마크 추가 시 새 카테고리를 바로 만들 수 있어요!',
-                      style: TextStyle(fontSize: 13, color: Colors.blue[900]),
+                      '💡 팁: 북마크 추가 시 새 카테고리를 바로 만들 수 있어요!\n카테고리를 삭제하면 북마크는 General로 이동됩니다.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue[900],
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ],
