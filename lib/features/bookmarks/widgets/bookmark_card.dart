@@ -1,13 +1,13 @@
-import 'package:bookmark_manager/core/utils/url_launcher_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_text_styles.dart';
+import '../../../core/utils/url_launcher_helper.dart';
 import '../models/bookmark.dart';
 
-class BookmarkCard extends StatelessWidget {
+class BookmarkCard extends StatefulWidget {
   final Bookmark bookmark;
   final VoidCallback onTap;
   final VoidCallback onEdit;
@@ -22,196 +22,267 @@ class BookmarkCard extends StatelessWidget {
   });
 
   @override
+  State<BookmarkCard> createState() => _BookmarkCardState();
+}
+
+class _BookmarkCardState extends State<BookmarkCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    final urlType = UrlLauncherHelper.detectUrlType(bookmark.url);
+    final urlType = UrlLauncherHelper.detectUrlType(widget.bookmark.url);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 헤더 (아이콘 + 제목 + 액션 버튼)
-              Row(
-                children: [
-                  // URL 타입 아이콘 (SNS인 경우만)
-                  if (urlType != UrlType.general) ...[
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: UrlLauncherHelper.getColor(
-                          urlType,
-                        )?.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        UrlLauncherHelper.getIcon(urlType),
-                        size: 20,
-                        color: UrlLauncherHelper.getColor(urlType),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Material(
+          elevation: _isHovered ? 8 : 0,
+          borderRadius: BorderRadius.circular(16),
+          shadowColor: Colors.black.withOpacity(0.1),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _isHovered
+                    ? AppColors.primary.withOpacity(0.3)
+                    : AppColors.border,
+                width: 1,
+              ),
+              boxShadow: _isHovered
+                  ? AppColors.elevatedShadow
+                  : AppColors.softShadow,
+            ),
+            child: InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 헤더
+                    _buildHeader(urlType),
+                    const SizedBox(height: 4),
 
-                  // 제목
-                  Expanded(
-                    child: Text(
-                      bookmark.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-
-                  // 액션 메뉴
-                  PopupMenuButton(
-                    icon: const Icon(Icons.more_vert),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'copy',
-                        child: Row(
-                          children: [
-                            Icon(Icons.copy, size: 20),
-                            SizedBox(width: 8),
-                            Text('URL 복사'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 20),
-                            SizedBox(width: 8),
-                            Text('수정'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete,
-                              size: 20,
-                              color: AppColors.error,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              '삭제',
-                              style: TextStyle(color: AppColors.error),
-                            ),
-                          ],
-                        ),
-                      ),
+                    // 설명
+                    if (widget.bookmark.description.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      _buildDescription(),
                     ],
-                    onSelected: (value) {
-                      if (value == 'copy') {
-                        Clipboard.setData(ClipboardData(text: bookmark.url));
-                        Fluttertoast.showToast(
-                          msg: 'URL이 복사되었습니다',
-                          backgroundColor: AppColors.success,
-                        );
-                      } else if (value == 'edit') {
-                        onEdit();
-                      } else if (value == 'delete') {
-                        onDelete();
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
 
-              // URL (클릭 가능) - context 전달
-              InkWell(
-                onTap: () => UrlLauncherHelper.openUrl(bookmark.url, context),
-                child: Text(
-                  bookmark.url,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.primary,
-                    decoration: TextDecoration.underline,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 12),
+
+                    // 하단
+                    _buildFooter(),
+                  ],
                 ),
               ),
-
-              // 설명 (있으면)
-              if (bookmark.description.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  bookmark.description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-
-              const SizedBox(height: 12),
-
-              // 하단 (카테고리 + 날짜)
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      bookmark.category,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    _formatDate(bookmark.createdAt),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
+  Widget _buildHeader(UrlType urlType) {
+    return Row(
+      children: [
+        // URL 타입 아이콘 (항상 표시)
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: urlType != UrlType.general
+                ? LinearGradient(
+                    colors: [
+                      UrlLauncherHelper.getColor(urlType)!.withOpacity(0.2),
+                      UrlLauncherHelper.getColor(urlType)!.withOpacity(0.1),
+                    ],
+                  )
+                : LinearGradient(
+                    colors: [
+                      AppColors.secondaryLight.withOpacity(0.15),
+                      AppColors.secondaryLight.withOpacity(0.05),
+                    ],
+                  ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            urlType != UrlType.general
+                ? UrlLauncherHelper.getIcon(urlType)
+                : Icons.language_rounded, // 기본 웹 아이콘
+            size: 18,
+            color: urlType != UrlType.general
+                ? UrlLauncherHelper.getColor(urlType)
+                : AppColors.secondaryLight,
+          ),
+        ),
 
-    if (difference.inDays == 0) {
-      return DateFormat('HH:mm').format(date);
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}일 전';
-    } else {
-      return DateFormat('yyyy.MM.dd').format(date);
-    }
+        const SizedBox(width: 12),
+
+        // 제목
+        Expanded(
+          child: Text(
+            widget.bookmark.title,
+            style: AppTextStyles.h4.copyWith(fontSize: 17, height: 1.3),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        // 액션 메뉴
+        _buildActionMenu(),
+      ],
+    );
+  }
+
+  Widget _buildActionMenu() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: PopupMenuButton(
+        icon: Icon(Icons.more_vert, color: AppColors.textSecondary, size: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: 'copy',
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.infoLight,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(
+                    Icons.copy_rounded,
+                    size: 18,
+                    color: AppColors.info,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text('URL 복사', style: AppTextStyles.bodyMedium),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'edit',
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryContainer,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(
+                    Icons.edit_rounded,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text('수정', style: AppTextStyles.bodyMedium),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'delete',
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.errorLight,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(
+                    Icons.delete_rounded,
+                    size: 18,
+                    color: AppColors.error,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '삭제',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        onSelected: (value) {
+          if (value == 'copy') {
+            Clipboard.setData(ClipboardData(text: widget.bookmark.url));
+            Fluttertoast.showToast(
+              msg: 'URL이 복사되었습니다',
+              backgroundColor: AppColors.success,
+            );
+          } else if (value == 'edit') {
+            widget.onEdit();
+          } else if (value == 'delete') {
+            widget.onDelete();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildDescription() {
+    return Text(
+      widget.bookmark.description,
+      style: AppTextStyles.bodyMedium.copyWith(
+        color: AppColors.textSecondary,
+        height: 1.6,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildFooter() {
+    return Row(
+      children: [
+        // 카테고리 뱃지
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryContainer.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check, size: 14, color: Colors.white),
+              const SizedBox(width: 6),
+              Text(
+                widget.bookmark.category,
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

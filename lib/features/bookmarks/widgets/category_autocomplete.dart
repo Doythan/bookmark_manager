@@ -25,7 +25,8 @@ class _CategoryAutocompleteState extends ConsumerState<CategoryAutocomplete> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialValue ?? 'General');
+    // ✅ 빈칸으로 시작
+    _controller = TextEditingController(text: widget.initialValue ?? '');
   }
 
   @override
@@ -94,12 +95,8 @@ class _CategoryAutocompleteState extends ConsumerState<CategoryAutocomplete> {
                     _controller.text = value;
                     widget.onChanged(value);
                   },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '카테고리를 입력하세요';
-                    }
-                    return null;
-                  },
+                  // ✅ validator 제거 (빈칸 허용)
+                  validator: null,
                 );
               },
           optionsViewBuilder:
@@ -123,6 +120,11 @@ class _CategoryAutocompleteState extends ConsumerState<CategoryAutocomplete> {
                         itemBuilder: (BuildContext context, int index) {
                           // 마지막 항목: "새 카테고리 만들기"
                           if (index == options.length) {
+                            // ✅ 빈칸일 때는 새 카테고리 옵션 숨기기
+                            if (_controller.text.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
                             return ListTile(
                               leading: const Icon(
                                 Icons.add_circle_outline,

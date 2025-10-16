@@ -13,7 +13,7 @@ class AppStrings {
 
   // Bookmarks
   static const String bookmarks = '북마크';
-  static const String myBookmarks = '내 북마크';
+  static const String myBookmarks = 'LinkOn';
   static const String addBookmark = '북마크 추가';
   static const String editBookmark = '북마크 수정';
   static const String deleteBookmark = '북마크 삭제';

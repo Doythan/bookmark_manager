@@ -340,7 +340,7 @@ class _ManageCategoriesDialogState
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '💡 팁: 북마크 추가 시 새 카테고리를 바로 만들 수 있어요!\n카테고리를 삭제하면 북마크는 General로 이동됩니다.',
+                      '💡 팁: 카테고리를 삭제 시 General로 이동',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.blue[900],
